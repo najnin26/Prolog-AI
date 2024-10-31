@@ -1,8 +1,0 @@
-name(shirin).
-name(abin).
-man(adam).
-girl(jerry).
-like(blue).
-like(adam,pizza).
-like(abin,banana).
-eat(adam,apple).
