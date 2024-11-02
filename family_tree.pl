@@ -1,4 +1,4 @@
-%facts
+/* Facts */
 male(john).
 male(peter).
 male(mike).
@@ -6,82 +6,94 @@ female(mary).
 female(susan).
 female(linda).
 
-parent(john,peter).
-parent(john,mary).
-parent(mary,susan).
-parent(pater,mike).
-parent(linda,mike).
+parent(john, peter).
+parent(john, mary).
+parent(mary, susan).
+parent(peter, mike).
+parent(linda, mike).
 
-spouse(john, elizabeth).
-spouse(elizabeth, john).
-spouse(mary, michael).
-spouse(michael, mary).
-spouse(peter, linda).
-spouse(linda, peter).
+/* Rules */
+father_of(X,Y):-
+    male(X),
+    parent(X,Y).
 
-%rules
-father(F,C):-
-    male(F),
-    parent(F,C).
+mother_of(X,Y):-
+    female(X),
+    parent(X,Y).
 
-mother(M,C):-
-    female(M),
-    parent(M,C).
+grandfather_of(X,Y):-
+    male(X),
+    parent(X,Z),
+    parent(Z,Y).
 
-sibling(X,Y):-
-    parent(Z,X),
+grandmother_of(X,Y):-
+    female(X),
+    parent(X,Z),
+    parent(Z,Y).
+
+sister_of(X,Y):- %(X,Y or Y,X)%
+    female(X),
+    father_of(F, Y),
+    father_of(F,X),
+    X \= Y.
+
+sister_of(X,Y):-
+    female(X),
+    mother_of(M, Y),
+    mother_of(M,X),
+    X \= Y.
+
+aunt_of(X,Y):-
+    female(X),
     parent(Z,Y),
-    X\=Y.
+    sister_of(Z,X),!.
 
-grandparent(GP,C):-
-    parent(GP,P),
-    parent(P,C).
+brother_of(X,Y):- %(X,Y or Y,X)%
+    male(X),
+    father_of(F, Y),
+    father_of(F,X),
+    X \= Y.
 
-aunt(A,C):-
-    female(A),
-    sibling(A,P),
-    parent(P,C).
+brother_of(X,Y):-
+    male(X),
+    mother_of(M, Y),
+    mother_of(M,X),X \= Y.
 
-uncle(U,C):-
-    male(U),
-    sibling(U,P),
-    parent(P,C).
+sibling(X, Y) :-
+    parent(Z, X),
+    parent(Z, Y),
+    X \= Y.
 
-children(P,CList):-
-    findall(C,parent(P,C),CList).
+uncle_of(X,Y):-
+    parent(Z,Y),
+    brother_of(Z,X).
 
-great_gradparent(GGP,C):-
-    parent(GGP,GP),
-    parent(GP,P),
-    parent(P,C).
+cousin(X, Y) :-
+    parent(P1, X),
+    parent(P2, Y),
+    sibling(P1, P2),
+    X \= Y.
 
-cousin(X,Y):-
-    parent(P1,X),
-    parent(P2,Y),
-    sibling(P1,P2),
-    X\=Y.
-
-% Define a marriage relationship
-married(X, Y) :-
-    spouse(X, Y).
-
-% Parent-in-law relationship
-parent_in_law(X, Y) :-
-    spouse(S, Y),
-    parent(X, S).
-
-% Sibling-in-law relationship (brother-in-law or sister-in-law)
 sibling_in_law(X, Y) :-
-    spouse(X, S),
-    sibling(S, Y).
+    sibling(X, S),
+    parent(_, Y),
+    parent(_, S),
+    S \= Y.
 
-% Mother-in-law relationship
+% Mother-in-law relationship: Similar logic for mother-in-law, based on female parents of siblings
 mother_in_law(MIL, C) :-
-    mother(MIL, P),
-    spouse(P, C).
+    female(MIL),
+    parent(MIL, S),
+    sibling(S, C).
 
-% Father-in-law relationship
+% Father-in-law relationship: Similar logic for father-in-law, based on male parents of siblings
 father_in_law(FIL, C) :-
-    father(FIL, P),
-    spouse(P, C).
+    male(FIL),
+    parent(FIL, S),
+    sibling(S, C).
 
+ancestor_of(X,Y):-
+    parent(X,Y).
+ancestor_of(X,Y):-
+    parent(X,Z),
+    ancestor_of(Z,Y).
